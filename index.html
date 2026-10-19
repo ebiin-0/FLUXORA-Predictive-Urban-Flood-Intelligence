@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLUXORA | Predictive Urban Flood Intelligence</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/logo.png">
+    <!-- Stylesheet with Cache Buster (v=12) -->
+    <link rel="stylesheet" href="assets/css/style.css?v=12">
+</head>
+<body class="mode-engineering">
+    <div class="app-container">
+        <!-- ===================================================================
+             1. SIMPLIFIED & VISUALLY GROUPED HEADER (Requirements 3 & 4)
+             =================================================================== -->
+        <header class="app-header">
+            <!-- LEFT: Compact Brand Lockup (Requirement 3) -->
+            <div class="header-left">
+                <div class="brand-icon-box">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 4h14c1.1 0 2 .9 2 2v1c0 .6-.4 1-1 1H9v3h8c.6 0 1 .4 1 1v1c0 .6-.4 1-1 1H9v6H4V4z" fill="#0F766E"/>
+                        <path d="M9 8h9M9 14h7" stroke="#2DD4BF" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="19" cy="14" r="2.5" fill="#D6A84F"/>
+                    </svg>
+                </div>
+                <div class="brand-title-wrap">
+                    <h1 class="brand-title">FLUXORA</h1>
+                    <span class="brand-tagline">Predictive Urban Flood Intelligence</span>
+                </div>
+            </div>
+            
+            <!-- CENTER: Grouped Status & Operating Mode (Requirement 4) -->
+            <div class="header-center">
+                <div class="header-status-pill" id="system-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">SYSTEM NORMAL</span>
+                </div>
+
+                <div class="header-feed-badge" id="header-live-badge">
+                    <span class="feed-dot"></span>
+                    <span id="header-network-text" style="font-weight: 700; color: var(--primary-light);">SIMULATION</span>
+                    <span style="color: var(--text-muted); font-size: 10px;">·</span>
+                    <span id="header-freshness" style="font-family: var(--font-mono); font-size: 10px;">SIMULATED FEED</span>
+                </div>
+
+                <!-- Mode Toggler (Intact for app.js) -->
+                <div class="btn-toggle-group" id="header-mode-toggle" style="display: flex;">
+                    <button class="toggle-btn active" id="mode-sim-tab">SIMULATION</button>
+                    <button class="toggle-btn" id="mode-live-tab">LIVE DATA</button>
+                </div>
+            </div>
+
+            <!-- RIGHT: Console View, Clock & Weather (Requirement 4) -->
+            <div class="header-right">
+                <div class="view-toggle-wrap" id="view-mode-toggle">
+                    <button class="btn-view-mode" id="btn-view-op">OPERATOR</button>
+                    <button class="btn-view-mode active" id="btn-view-eng">ENGINEERING</button>
+                </div>
+
+                <div class="header-time-block">
+                    <i data-lucide="clock" style="width: 14px; height: 14px; color: var(--primary-light);"></i>
+                    <span id="sim-time">14:30</span>
+                </div>
+
+                <div class="header-weather-block" id="weather-brief">
+                    <i id="weather-icon" data-lucide="cloud-rain" style="width: 14px; height: 14px; color: var(--primary-light);"></i>
+                    <span id="weather-desc">22°C · Light Rain</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===================================================================
+             2. FLUXORA FLOW MOTIF (Requirement 20)
+             =================================================================== -->
+        <div class="fluxora-flow-motif">
+            <div class="flow-step">
+                <span class="flow-node physical"><i data-lucide="cloud-rain" style="width: 12px; height: 12px;"></i> RAIN</span>
+                <span class="flow-arrow">➔</span>
+            </div>
+            <div class="flow-step">
+                <span class="flow-node physical"><i data-lucide="waves" style="width: 12px; height: 12px;"></i> INFLOW</span>
+                <span class="flow-arrow">➔</span>
+            </div>
+            <div class="flow-step">
+                <span class="flow-node physical"><i data-lucide="git-merge" style="width: 12px; height: 12px;"></i> DRAINAGE</span>
+                <span class="flow-arrow to-prediction">➔</span>
+            </div>
+            <div class="flow-step">
+                <span class="flow-node prediction"><i data-lucide="sparkles" style="width: 12px; height: 12px;"></i> PREDICTION</span>
+                <span class="flow-arrow to-prediction">➔</span>
+            </div>
+            <div class="flow-step">
+                <span class="flow-node prediction"><i data-lucide="shield" style="width: 12px; height: 12px;"></i> RESPONSE</span>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+             3. PRODUCT-CLASS NAVIGATION TABS (Requirement 12)
+             =================================================================== -->
+        <nav class="dashboard-tabs">
+            <button class="tab-link active" data-tab="tab-live"><i data-lucide="layout-dashboard"></i> Command View</button>
+            <button class="tab-link" data-tab="tab-analytics"><i data-lucide="bar-chart-2"></i> Flood Analytics</button>
+            <button class="tab-link" data-tab="tab-history"><i data-lucide="history"></i> Incident Archive</button>
+            <button class="tab-link" data-tab="tab-architecture"><i data-lucide="network"></i> System Architecture</button>
+        </nav>
+
+        <!-- MAIN CONTENT WRAPPER -->
+        <main class="app-main" style="width: 100%; display: flex; flex-direction: column; gap: 16px;">
+            
+            <!-- ===================================================================
+                 TAB 1: COMMAND VIEW (OPERATIONAL WORKSPACE)
+                 =================================================================== -->
+            <div id="tab-live" class="tab-content" style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+                
+                <!-- LIVE MQTT STREAM STATUS BANNER -->
+                <div id="live-packet-banner" class="live-packet-stream" style="display: none;">
+                    <span><i data-lucide="radio" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle;"></i> <b>MQTT TELEMETRY GATEWAY:</b> mqtt://iot.fluxora.internal:1883</span>
+                    <span><b>STATUS:</b> CONNECTED</span>
+                    <span><b>PACKETS INGESTED:</b> <span id="live-packet-count">18,492</span></span>
+                    <span><b>LATENCY:</b> <span id="live-latency-val">38ms</span></span>
+                    <span><b>CRC INTEGRITY:</b> VERIFIED (0 LOSS)</span>
+                </div>
+
+                <!-- 6-STAGE NARRATIVE FLOOD STRESS TEST PROGRESS BAR (Requirement 15) -->
+                <div id="narrative-step-bar" class="narrative-step-bar">
+                    <div class="nsb-header">
+                        <span class="nsb-stage-label" id="nsb-stage-label"><i data-lucide="play-circle"></i> Stage 1 of 6: Baseline Normal Inflow</span>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span id="nsb-time-remaining" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">Step: 12s remaining</span>
+                            <button class="btn btn-secondary" id="btn-cancel-narrative" style="padding: 3px 10px; font-size: 10px; height: auto;">Exit Test</button>
+                        </div>
+                    </div>
+                    <div class="nsb-track">
+                        <div class="nsb-fill" id="nsb-progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- ===============================================================
+                     4 MAIN METRICS ROW: HERO FLOOD RISK CARD (Requirement 5 & 2)
+                     =============================================================== -->
+                <section class="metrics-row">
+                    <!-- Card 1: Rainfall Rate -->
+                    <div class="metric-card" id="metric-rainfall">
+                        <div class="metric-icon">
+                            <i data-lucide="cloud-rain"></i>
+                        </div>
+                        <div class="metric-data">
+                            <span class="metric-label">Rainfall Rate</span>
+                            <span class="metric-value" id="val-rainfall">12 mm/h</span>
+                            <span class="metric-sub" id="sub-rainfall">Steady Trend · Nominal</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: System Water Level (White + Teal) -->
+                    <div class="metric-card" id="metric-avg-level">
+                        <div class="metric-icon">
+                            <i data-lucide="droplet"></i>
+                        </div>
+                        <div class="metric-data">
+                            <span class="metric-label">System Water Level</span>
+                            <span class="metric-value" id="val-avg-level" style="color: #ffffff;">1.22 m</span>
+                            <span class="metric-sub" id="sub-avg-level" style="color: var(--primary-light);">Warning: 2.20 m · Critical: 2.50 m</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: HERO FLOOD RISK SCORE (~1.4x Prominence, Amber Accent Edge) -->
+                    <div class="metric-card hero-risk-card" id="metric-risk">
+                        <div class="metric-icon">
+                            <i data-lucide="shield-alert"></i>
+                        </div>
+                        <div class="metric-data">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span class="metric-label">FLOOD RISK</span>
+                                <span class="hero-risk-badge" id="sub-risk">LOW</span>
+                            </div>
+                            <span class="metric-value" id="val-risk">27%</span>
+                            <span class="metric-sub" style="color: var(--prediction);">45 min predictive horizon</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Predictive Time to Critical -->
+                    <div class="metric-card" id="metric-time-to-impact">
+                        <div class="metric-icon">
+                            <i data-lucide="timer"></i>
+                        </div>
+                        <div class="metric-data">
+                            <span class="metric-label">Time to Critical</span>
+                            <span class="metric-value" id="val-time-to-critical" style="font-size: 15px; font-weight: 800;">NO IMMEDIATE THREAT</span>
+                            <span class="metric-sub" id="sub-time-to-critical">Safe Operational Bounds</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2-COLUMN OPERATIONAL WORKSPACE -->
+                <div class="dashboard-grid" style="display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 16px;">
+                    
+                    <!-- LEFT COLUMN: MAP + SENSOR TABLE + SCENARIO LAB -->
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        
+                        <!-- SECTION 1: URBAN DRAINAGE CATCHMENT MAP (Requirements 6 & 7) -->
+                        <section class="panel map-panel">
+                            <div class="panel-header">
+                                <h2><i data-lucide="map-pin"></i> Urban Catchment Drainage & Risk Map</h2>
+                                <span class="panel-subtitle">Wards 5, 8 & 12 · Hydrological Basin Network</span>
+                            </div>
+
+                            <div class="map-container" style="position: relative; padding: 0; overflow: hidden; border-radius: 8px;">
+                                <!-- Real Leaflet Dark Map Container -->
+                                <div id="fluxora-map" style="width: 100%; height: 450px; background: #071411;"></div>
+
+                                <!-- Leaflet Custom Floating Map Controls (Top-Left) -->
+                                <div class="map-overlay-controls top-left">
+                                    <button class="map-ctrl-btn" id="btn-map-zoom-in" title="Zoom In" type="button"><i data-lucide="plus"></i></button>
+                                    <button class="map-ctrl-btn" id="btn-map-zoom-out" title="Zoom Out" type="button"><i data-lucide="minus"></i></button>
+                                    <button class="map-ctrl-btn" id="btn-map-recenter" title="Reset Catchment Extent" type="button"><i data-lucide="crosshair"></i></button>
+                                </div>
+
+                                <!-- Map Layers Switcher (Top-Right) -->
+                                <div class="map-overlay-controls top-right">
+                                    <div class="map-layers-widget" id="map-layers-widget">
+                                        <button class="map-layers-btn" id="btn-toggle-layers" title="Map Layers" type="button">
+                                            <i data-lucide="layers"></i> <span>LAYERS</span>
+                                        </button>
+                                        <div class="map-layers-dropdown" id="map-layers-dropdown" style="display: none;">
+                                            <div style="font-size: 8.5px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px;">BASE INTERFACE</div>
+                                            <label><input type="radio" name="map-base-layer" value="google-dark" checked> Google Dark Roads</label>
+                                            <label><input type="radio" name="map-base-layer" value="google-sat"> Google Satellite</label>
+                                            <label><input type="radio" name="map-base-layer" value="esri-dark"> Esri Dark Canvas</label>
+                                            <div style="height: 1px; background: var(--border); margin: 3px 0;"></div>
+                                            <div style="font-size: 8.5px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px;">OVERLAYS</div>
+                                            <label><input type="checkbox" id="layer-chk-sensors" checked> Catchment Sensors</label>
+                                            <label><input type="checkbox" id="layer-chk-drainage" checked> Drainage Network</label>
+                                            <label><input type="checkbox" id="layer-chk-flow" checked> Active Flow Vectors</label>
+                                            <label><input type="checkbox" id="layer-chk-prediction" checked> Flood Horizon Overlay</label>
+                                            <label><input type="checkbox" id="layer-chk-inundation" checked> Critical Inundation</label>
+                                            <label><input type="checkbox" id="layer-chk-infra" checked> Pumps & Sluice Gate</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Floating SCADA Legend (Bottom-Right) -->
+                                <div class="map-overlay-legend bottom-right">
+                                    <div class="scada-legend-header">CATCHMENT SCADA SYMBOLS</div>
+                                    <div class="scada-legend-grid">
+                                        <div class="leg-item"><span class="leg-sym dot-teal"></span> S1–S4 Sensors</div>
+                                        <div class="leg-item"><span class="leg-sym line-teal"></span> Drainage Network</div>
+                                        <div class="leg-item"><span class="leg-sym flow-dash"></span> Dynamic Flow</div>
+                                        <div class="leg-item"><span class="leg-sym poly-amber"></span> Predicted Horizon</div>
+                                        <div class="leg-item"><span class="leg-sym poly-red"></span> Critical Inundation</div>
+                                        <div class="leg-item"><span class="leg-sym pump-icon">⚙</span> P1/P2 Pumps</div>
+                                        <div class="leg-item"><span class="leg-sym gate-icon">◇</span> Sluice Gate A</div>
+                                    </div>
+                                </div>
+
+                                <!-- Floating Threat State Pill (Bottom-Left) -->
+                                <div class="map-overlay-pill bottom-left" id="map-threat-status-pill">
+                                    <span class="threat-dot dot-normal" id="map-threat-dot"></span>
+                                    <span id="map-threat-text">BASIN THREAT: NORMAL (CHANNELS NOMINAL)</span>
+                                </div>
+
+                                <!-- Legacy ID Fallbacks for Backward Compatibility -->
+                                <div id="ward12-flood-polygon" style="display: none;"></div>
+                                <span id="ward12-flood-label" style="display: none;"></span>
+                            </div>
+                        </section>
+
+                        <!-- SECTION 2: SENSOR TELEMETRY COMPARISON TABLE -->
+                        <section class="panel">
+                            <div class="panel-header">
+                                <h2><i data-lucide="table"></i> Catchment Sensor Telemetry</h2>
+                                <span class="panel-subtitle">Click row to focus predictive analytics</span>
+                            </div>
+                            <div class="sensor-table-container">
+                                <table class="sensor-grid-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Sensor</th>
+                                            <th>Location / Ward</th>
+                                            <th>Depth</th>
+                                            <th>Capacity Limit</th>
+                                            <th>Rise Rate</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sensor-table-body">
+                                        <tr id="st-row-s1" class="active" onclick="selectSensor('S1')">
+                                            <td><b>S1</b>: Upstream</td>
+                                            <td>Ward 5 (Residential)</td>
+                                            <td id="st-depth-s1" style="color: var(--primary-light); font-weight: 700;">1.22 m</td>
+                                            <td>2.50 m</td>
+                                            <td id="st-rate-s1">+0.12 m/h</td>
+                                            <td><span class="status-badge state-normal">NORMAL</span></td>
+                                        </tr>
+                                        <tr id="st-row-s2" onclick="selectSensor('S2')">
+                                            <td><b>S2</b>: Interceptor</td>
+                                            <td>Ward 8 (Commercial)</td>
+                                            <td id="st-depth-s2" style="color: var(--primary-light); font-weight: 700;">1.05 m</td>
+                                            <td>2.50 m</td>
+                                            <td id="st-rate-s2">+0.18 m/h</td>
+                                            <td><span class="status-badge state-normal">NORMAL</span></td>
+                                        </tr>
+                                        <tr id="st-row-s3" onclick="selectSensor('S3')">
+                                            <td><b>S3</b>: Runoff</td>
+                                            <td>Ward 5 (Commercial)</td>
+                                            <td id="st-depth-s3" style="color: var(--primary-light); font-weight: 700;">0.91 m</td>
+                                            <td>2.50 m</td>
+                                            <td id="st-rate-s3">+0.08 m/h</td>
+                                            <td><span class="status-badge state-normal">NORMAL</span></td>
+                                        </tr>
+                                        <tr id="st-row-s4" onclick="selectSensor('S4')">
+                                            <td><b>S4</b>: Outfall Basin</td>
+                                            <td>Ward 12 (Low-Lying)</td>
+                                            <td id="st-depth-s4" style="color: var(--primary-light); font-weight: 700;">1.25 m</td>
+                                            <td>2.50 m</td>
+                                            <td id="st-rate-s4">+0.14 m/h</td>
+                                            <td><span class="status-badge state-normal">NORMAL</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- SECTION 3: FLOOD SCENARIO LAB (Requirements 13 & 14) -->
+                        <section class="panel fsl-panel">
+                            <div class="panel-header">
+                                <div>
+                                    <h2><i data-lucide="sliders"></i> FLOOD SCENARIO LAB</h2>
+                                    <span class="panel-subtitle">Test how rainfall, blockage and infrastructure response change flood risk.</span>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-demo" id="btn-trigger-demo"><i data-lucide="play-circle"></i> Run 6-Stage Test</button>
+                                    <button class="btn btn-secondary" id="btn-reset-sim"><i data-lucide="refresh-cw"></i> Reset</button>
+                                </div>
+                            </div>
+                            
+                            <div class="fsl-categories-grid">
+                                <!-- Group 1: WEATHER -->
+                                <div class="fsl-category-box">
+                                    <span class="fsl-cat-title"><i data-lucide="cloud-lightning"></i> Weather</span>
+                                    <div>
+                                        <div class="control-label-row">
+                                            <label for="sim-weather">Rainfall Intensity</label>
+                                            <span class="control-value" id="sim-weather-value">Light Drizzle (12 mm/h)</span>
+                                        </div>
+                                        <input type="range" id="sim-weather" min="0" max="3" step="1" value="0" class="slider">
+                                        <div class="slider-marks">
+                                            <span>Drizzle</span>
+                                            <span>Moderate</span>
+                                            <span>Heavy</span>
+                                            <span>Burst</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Group 2: DRAINAGE -->
+                                <div class="fsl-category-box">
+                                    <span class="fsl-cat-title"><i data-lucide="ban"></i> Drainage</span>
+                                    <div>
+                                        <div class="control-label-row">
+                                            <label for="sim-blockage">Debris Blockage</label>
+                                            <span class="control-value" id="sim-blockage-value">0% (Clear)</span>
+                                        </div>
+                                        <input type="range" id="sim-blockage" min="0" max="100" step="5" value="0" class="slider">
+                                        <div class="slider-marks">
+                                            <span>Clear</span>
+                                            <span>Partial</span>
+                                            <span>Severe (90%+)</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Group 3: INFRASTRUCTURE -->
+                                <div class="fsl-category-box">
+                                    <span class="fsl-cat-title"><i data-lucide="zap"></i> Infrastructure</span>
+                                    <div>
+                                        <div class="control-label-row">
+                                            <label>Sump Drainage Pumps</label>
+                                            <span class="control-value" id="pump-status-label">AUTO</span>
+                                        </div>
+                                        <div class="btn-toggle-group" id="pump-mode-group">
+                                            <button class="toggle-btn active" data-val="auto">AUTO</button>
+                                            <button class="toggle-btn" data-val="on">FORCE ON</button>
+                                            <button class="toggle-btn" data-val="off">FORCE OFF</button>
+                                        </div>
+                                        <div class="pump-indicators">
+                                            <span class="pump-led" id="led-pump1">P1: OFF</span>
+                                            <span class="pump-led" id="led-pump2">P2: OFF</span>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 8px;">
+                                        <div class="control-label-row">
+                                            <label>Sluice Gate A Control</label>
+                                            <span class="control-value" id="gate-status-label">AUTO</span>
+                                        </div>
+                                        <div class="btn-toggle-group" id="gate-mode-group">
+                                            <button class="toggle-btn active" data-val="auto">AUTO</button>
+                                            <button class="toggle-btn" data-val="open">OPEN</button>
+                                            <button class="toggle-btn" data-val="closed">CLOSED</button>
+                                        </div>
+                                        <div class="pump-indicators">
+                                            <span class="pump-led" id="led-gate">Gate: CLOSED</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Group 4: SENSOR FAULT -->
+                                <div class="fsl-category-box">
+                                    <span class="fsl-cat-title"><i data-lucide="alert-triangle"></i> Sensor Fault</span>
+                                    <div>
+                                        <div class="control-label-row">
+                                            <label>Telemetry Simulation</label>
+                                            <span class="control-value" id="sim-fault-value">Normal</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                                            <input type="checkbox" id="toggle-s3-fault" style="accent-color: var(--warning); cursor: pointer;">
+                                            <span style="font-size: 11px; color: var(--text-secondary);">Simulate S3 Runoff Failure</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Group 5: SIMULATION PRESETS (Requirement 14: Short Names) -->
+                                <div class="fsl-category-box" style="grid-column: span 2;">
+                                    <span class="fsl-cat-title"><i data-lucide="layers"></i> Simulation Scenarios & Speed</span>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                        <div>
+                                            <div class="control-label-row">
+                                                <label for="sim-preset">Scenario Preset</label>
+                                                <span class="control-value" id="sim-preset-value">Custom</span>
+                                            </div>
+                                            <select id="sim-preset" style="width: 100%; background: var(--surface-3); color: var(--text-primary); border: 1px solid var(--border); padding: 7px; border-radius: 6px; font-size: 11px; outline: none;">
+                                                <option value="custom">-- Custom Controls --</option>
+                                                <option value="normal">Normal</option>
+                                                <option value="heavy">Heavy Rain</option>
+                                                <option value="extreme">Extreme Rain</option>
+                                                <option value="blockage">Drain Blockage</option>
+                                                <option value="pump-fail">Pump Failure</option>
+                                                <option value="sensor-fail">Sensor Failure</option>
+                                                <option value="flash">Flash Flood</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <div class="control-label-row">
+                                                <label>Speed Factor</label>
+                                                <span class="control-value" id="sim-speed-value">1x</span>
+                                            </div>
+                                            <div class="btn-toggle-group" id="sim-speed-group">
+                                                <button class="toggle-btn" data-val="0.5">0.5x</button>
+                                                <button class="toggle-btn active" data-val="1">1x</button>
+                                                <button class="toggle-btn" data-val="2">2x</button>
+                                                <button class="toggle-btn" data-val="5">5x</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- RIGHT COLUMN: TELEMETRY + PREDICTION + ACTION CENTER + CONFIDENCE + ALERTS -->
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        
+                        <!-- PANEL 1: ACTIVE SENSOR TELEMETRY & FORECAST -->
+                        <section class="panel">
+                            <div class="panel-header">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-size: 9px; font-weight: 800; letter-spacing: 0.8px; color: var(--primary-light); text-transform: uppercase;">SELECTED MONITOR</span>
+                                    <h2 id="focus-sensor-name" style="font-size: 14px;">S1: Residential Upstream</h2>
+                                </div>
+                                <div class="status-badge state-normal" id="focus-sensor-status">
+                                    Nominal
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 16px;">
+                                <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;">
+                                    <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; display: block;">Current Depth</span>
+                                    <span id="tel-depth" style="font-size: 17px; font-weight: 800; color: var(--text-primary); font-family: var(--font-mono);">1.22 m</span>
+                                    <div style="width: 100%; height: 4px; background: var(--surface-3); border-radius: 2px; margin-top: 4px; overflow: hidden;">
+                                        <div id="tel-depth-progress" style="height: 100%; width: 49%; background: var(--primary-light); border-radius: 2px; transition: width 0.3s ease;"></div>
+                                    </div>
+                                </div>
+                                <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;">
+                                    <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; display: block;">Rate of Rise</span>
+                                    <span id="tel-rise-rate" style="font-size: 17px; font-weight: 800; color: var(--text-primary); font-family: var(--font-mono);">+0.12 m/h</span>
+                                    <span id="tel-rise-sub" style="font-size: 10px; color: var(--state-normal); display: block; margin-top: 2px;">Stable Trend</span>
+                                </div>
+                                <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;">
+                                    <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; display: block;">Warning Level</span>
+                                    <span id="tel-warning-thresh" style="font-size: 15px; font-weight: 700; color: var(--warning); font-family: var(--font-mono);">2.20 m</span>
+                                    <span style="font-size: 9.5px; color: var(--text-muted); display: block; margin-top: 2px;">Hydraulic Alarm</span>
+                                </div>
+                                <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;">
+                                    <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; display: block;">Critical Capacity</span>
+                                    <span id="tel-capacity" style="font-size: 15px; font-weight: 700; color: var(--danger); font-family: var(--font-mono);">2.50 m</span>
+                                    <span style="font-size: 9.5px; color: var(--text-muted); display: block; margin-top: 2px;">Overflow Limit</span>
+                                </div>
+                            </div>
+
+                            <div style="padding: 0 16px 10px 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="font-size: 9.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <i data-lucide="trending-up" style="width: 11px; height: 11px; display: inline-block; vertical-align: middle;"></i> WATER LEVEL FORECAST TIMELINE
+                                    </span>
+                                    <span id="active-sensor-title" style="font-size: 9.5px; font-weight: 700; color: var(--primary-light);">S1</span>
+                                </div>
+                                <div class="telemetry-chart-wrap" style="position: relative; height: 95px; width: 100%; margin-bottom: 4px;">
+                                    <canvas id="telemetryChart"></canvas>
+                                </div>
+                                
+                                <!-- HORIZONTAL FORECAST TIMELINE NODES (Requirement 8 - Compact Strip) -->
+                                <div class="flood-horizon-timeline" id="flood-horizon-timeline">
+                                    <div class="fht-step">
+                                        <span class="fht-time">NOW</span>
+                                        <div class="fht-node" id="fht-node-now">N</div>
+                                        <span class="fht-depth" id="fht-depth-now">1.22m</span>
+                                    </div>
+                                    <div class="fht-connector"></div>
+                                    <div class="fht-step">
+                                        <span class="fht-time">+10m</span>
+                                        <div class="fht-node" id="fht-node-10">1</div>
+                                        <span class="fht-depth" id="fht-depth-10">1.34m</span>
+                                    </div>
+                                    <div class="fht-connector"></div>
+                                    <div class="fht-step">
+                                        <span class="fht-time">+20m</span>
+                                        <div class="fht-node" id="fht-node-20">2</div>
+                                        <span class="fht-depth" id="fht-depth-20">1.46m</span>
+                                    </div>
+                                    <div class="fht-connector"></div>
+                                    <div class="fht-step">
+                                        <span class="fht-time">+30m</span>
+                                        <div class="fht-node" id="fht-node-30">3</div>
+                                        <span class="fht-depth" id="fht-depth-30">1.58m</span>
+                                    </div>
+                                    <div class="fht-connector"></div>
+                                    <div class="fht-step">
+                                        <span class="fht-time">+45m</span>
+                                        <div class="fht-node" id="fht-node-45">C</div>
+                                        <span class="fht-depth" id="fht-depth-45">1.76m</span>
+                                    </div>
+                                </div>
+
+                                <div id="telemetry-chart-forecast-alert" style="font-size: 10px; font-weight: 700; color: var(--state-normal); text-align: center; margin-top: 5px; padding: 4px 10px; background: rgba(79, 157, 105, 0.08); border-radius: 4px; border: 1px dashed rgba(79, 157, 105, 0.25);">
+                                    Predicted critical level: NO IMMEDIATE THREAT
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- PANEL 2: FLUXORA FORECAST CORE (Requirements 9, 10 & 12) -->
+                        <section class="panel prediction-panel">
+                            <div class="panel-header">
+                                <div>
+                                    <h2><i data-lucide="calculator"></i> FLUXORA Forecast Core</h2>
+                                    <span class="panel-subtitle">Hybrid Flood Risk Model</span>
+                                </div>
+                            </div>
+                            
+                            <div style="padding: 14px 18px;">
+                                <!-- Primary & Secondary Operational Drivers -->
+                                <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+                                        <div>
+                                            <span style="color: var(--text-muted); font-size: 10px; text-transform: uppercase;">Primary Driver:</span>
+                                            <div id="driver-primary" style="font-weight: 700; color: #ffffff;">Water Level Inflow</div>
+                                        </div>
+                                        <div>
+                                            <span style="color: var(--text-muted); font-size: 10px; text-transform: uppercase;">Secondary Driver:</span>
+                                            <div id="driver-secondary" style="font-weight: 700; color: var(--primary-light);">Nominal Basin Drainage</div>
+                                        </div>
+                                        <div>
+                                            <span style="color: var(--text-muted); font-size: 10px; text-transform: uppercase;">Estimated Impact:</span>
+                                            <div id="driver-impact" style="font-weight: 600; color: var(--text-secondary);">Discharge Channels Clear</div>
+                                        </div>
+                                        <div>
+                                            <span style="color: var(--text-muted); font-size: 10px; text-transform: uppercase;">Time To Critical:</span>
+                                            <div id="driver-time" style="font-weight: 700; color: var(--state-normal);">NO THREAT</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mathematical Breakdown Table (Requirement 9: Amber Total Risk) -->
+                                <table class="risk-breakdown-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Factor</th>
+                                            <th>Input</th>
+                                            <th>Weight</th>
+                                            <th>Computation</th>
+                                            <th>Score Contribution</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Water Level (W)</td>
+                                            <td id="rb-in-level">1.22 m (49% Cap)</td>
+                                            <td>× 50</td>
+                                            <td id="rb-comp-level">(1.22 / 2.50) × 50</td>
+                                            <td id="rb-score-level" style="font-weight: 700; color: var(--state-normal);">24.4%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Rainfall Rate (R)</td>
+                                            <td id="rb-in-rain">12 mm/h</td>
+                                            <td>× 15</td>
+                                            <td id="rb-comp-rain">(12 / 150) × 15</td>
+                                            <td id="rb-score-rain" style="font-weight: 700; color: var(--state-normal);">1.2%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Rate of Rise (V)</td>
+                                            <td id="rb-in-rise">+0.12 m/h</td>
+                                            <td>× 15</td>
+                                            <td id="rb-comp-rise">(0.12 / 1.0) × 15</td>
+                                            <td id="rb-score-rise" style="font-weight: 700; color: var(--state-normal);">1.8%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Basin Blockage (B)</td>
+                                            <td id="rb-in-block">0%</td>
+                                            <td>× 20</td>
+                                            <td id="rb-comp-block">(0 / 100) × 20</td>
+                                            <td id="rb-score-block" style="font-weight: 700; color: var(--state-normal);">0.0%</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4" style="text-align: right; letter-spacing: 0.5px; font-weight: 700;">TOTAL CALCULATED RISK:</td>
+                                            <td id="rb-score-total">27.4% [LOW]</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- PANEL 3: ACTION CENTER (Requirement 11) -->
+                        <div class="action-center-card status-normal" id="action-center-card">
+                            <div class="ac-header">
+                                <span class="ac-title"><i data-lucide="shield"></i> Action Center</span>
+                                <span class="ac-status-tag state-normal" id="ac-status-tag">PREVENTIVE STANDBY</span>
+                            </div>
+                            <div class="ac-grid">
+                                <div>
+                                    <span class="ac-cell-label">Recommended Action:</span>
+                                    <span class="ac-cell-value" id="ac-rec-action">Maintain gravity drainage. Standby sumps.</span>
+                                </div>
+                                <div>
+                                    <span class="ac-cell-label">Trigger Condition:</span>
+                                    <span class="ac-cell-value" id="ac-rec-reason">All stations within safe hydraulic bounds.</span>
+                                </div>
+                                <div>
+                                    <span class="ac-cell-label">Expected Mitigation Effect:</span>
+                                    <span class="ac-cell-value" id="ac-rec-effect">Stable discharge flow rate (1.4 m³/s).</span>
+                                </div>
+                                <div>
+                                    <span class="ac-cell-label">SCADA Control Mode:</span>
+                                    <span class="ac-cell-value" id="ac-control-mode" style="color: var(--primary-light);">AUTOMATED INTERVENTION</span>
+                                </div>
+                            </div>
+                            <div class="ac-buttons">
+                                <button class="ac-btn ac-btn-execute" id="ac-btn-exec" onclick="triggerManualAction()">EXECUTE MITIGATION</button>
+                                <button class="ac-btn ac-btn-ack" id="ac-btn-ack" onclick="acknowledgeAlert()">ACKNOWLEDGE</button>
+                                <button class="ac-btn ac-btn-override" id="ac-btn-ovr" onclick="toggleScadaOverride()">MANUAL OVERRIDE</button>
+                            </div>
+                        </div>
+
+                        <!-- PANEL 4: TELEMETRY HEALTH & COMPUTED CONFIDENCE (Requirement 10: Teal) -->
+                        <section class="panel">
+                            <div class="panel-header">
+                                <h2><i data-lucide="shield-check"></i> Network Telemetry Health & Confidence</h2>
+                                <span class="panel-subtitle">Dynamic Multi-Factor Evaluation</span>
+                            </div>
+                            <div style="padding: 14px 18px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 10px;">
+                                    <div>
+                                        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Computed Confidence:</span>
+                                        <div id="pe-confidence-val" style="font-size: 22px; font-weight: 800; margin-top: 2px;">94%</div>
+                                    </div>
+                                    <div style="text-align: right; max-width: 65%;">
+                                        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Diagnostic Rationale:</span>
+                                        <div id="pe-confidence-reason" style="font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-top: 2px;">
+                                            4/4 sensors healthy · Telemetry 1.2s fresh · 0% packet loss
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-size: 10px; margin-bottom: 10px;">
+                                    <div style="background: var(--surface-2); padding: 6px; border-radius: 4px; border: 1px solid var(--border); text-align: center;">
+                                        <span style="color: var(--text-muted); display: block;">S1 Upstream</span>
+                                        <span style="color: var(--state-normal); font-weight: 700;">ONLINE 98%</span>
+                                    </div>
+                                    <div style="background: var(--surface-2); padding: 6px; border-radius: 4px; border: 1px solid var(--border); text-align: center;">
+                                        <span style="color: var(--text-muted); display: block;">S2 Main</span>
+                                        <span style="color: var(--state-normal); font-weight: 700;">ONLINE 99%</span>
+                                    </div>
+                                    <div style="background: var(--surface-2); padding: 6px; border-radius: 4px; border: 1px solid var(--border); text-align: center;">
+                                        <span style="color: var(--text-muted); display: block;">S3 Runoff</span>
+                                        <span id="sh-s3-status" style="color: var(--state-normal); font-weight: 700;">ONLINE 96%</span>
+                                    </div>
+                                    <div style="background: var(--surface-2); padding: 6px; border-radius: 4px; border: 1px solid var(--border); text-align: center;">
+                                        <span style="color: var(--text-muted); display: block;">S4 Outfall</span>
+                                        <span style="color: var(--state-normal); font-weight: 700;">ONLINE 97%</span>
+                                    </div>
+                                </div>
+
+                                <!-- REDUNDANCY BANNER -->
+                                <div id="redundancy-banner" style="display: none; background: rgba(217, 154, 43, 0.1); border: 1px solid rgba(217, 154, 43, 0.3); border-radius: 6px; padding: 8px 12px; font-size: 11px; color: var(--warning); margin-bottom: 10px;">
+                                    <i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
+                                    <b>REDUNDANCY FAILOVER ENGAGED:</b> S3 Telemetry Offline. Interpolating downstream inflow via S1 & S2 physical gradient models.
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- PANEL 5: ALERT HUB & EMERGENCY BROADCASTING (Requirement 19: Keep Emergency Red) -->
+                        <section class="panel alerts-panel">
+                            <div class="panel-header">
+                                <h2><i data-lucide="bell"></i> Alert Hub & Emergency Broadcasting</h2>
+                                <span id="active-alert-count" class="status-badge state-normal" style="font-size: 10px;">0 Active Alerts</span>
+                            </div>
+
+                            <!-- Emergency Broadcasting Lifecycle Unit -->
+                            <div id="emergency-broadcast-card" style="margin: 12px 18px; padding: 12px 14px; border-radius: 8px; background: var(--surface-2); border: 1px solid rgba(201, 76, 76, 0.3); display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 11px; font-weight: 700; color: var(--danger); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                                        <i data-lucide="radio" style="width: 14px; height: 14px;"></i> Public Warning Lifecycle
+                                    </span>
+                                    <span id="eb-lifecycle-badge" style="font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; background: rgba(79, 157, 105, 0.15); color: var(--state-normal); border: 1px solid rgba(79, 157, 105, 0.3);">READY</span>
+                                </div>
+                                
+                                <div style="font-size: 11px; color: var(--text-secondary);">
+                                    <b>Target Zone:</b> Ward 12 (Low-Lying Basin)<br>
+                                    <b>Action Directive:</b> <span id="eb-directive-text" style="color: var(--text-primary);">Pre-evacuation standby for low-lying residential sectors.</span>
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; border-top: 1px dashed var(--border); padding-top: 6px;">
+                                    <span style="font-size: 10px; color: var(--text-muted);">Audience: <b>14,200 Citizens</b></span>
+                                    <button class="btn" id="btn-trigger-broadcast" style="padding: 4px 12px; font-size: 10px; background: var(--danger); border-radius: 4px; font-weight: 700; color: white;" onclick="progressBroadcastLifecycle()">AUTHORIZE BROADCAST</button>
+                                </div>
+                            </div>
+
+                            <!-- Live Chronological System Events Log -->
+                            <div style="padding: 0 18px 14px 18px;">
+                                <div class="alert-feed" id="alert-feed-log" style="max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+                                    <div class="alert-system-msg" style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); border-left: 2px solid var(--primary-light); padding-left: 8px;">
+                                        <span class="msg-time" style="color: var(--primary-light);">[14:30:00]</span> FLUXORA telemetry kernel initialized. 4/4 catchment nodes online.
+                                    </div>
+                                    <div class="alert-system-msg" style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); border-left: 2px solid var(--primary-light); padding-left: 8px;">
+                                        <span class="msg-time" style="color: var(--primary-light);">[14:30:02]</span> Hydrodynamic model calibrated with Ward 12 outfall limits.
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================================================================
+                 TAB 2: FLOOD ANALYTICS (Requirement 12 & 17)
+                 =================================================================== -->
+            <div id="tab-analytics" class="tab-content" style="display: none; flex-direction: column; gap: 16px; width: 100%;">
+                <!-- Range Selector Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1px solid var(--border); padding: 12px 20px; border-radius: var(--radius-md);">
+                    <div>
+                        <h2 style="font-size: 15px; font-weight: 700; color: #ffffff;"><i data-lucide="bar-chart-2"></i> Hydrodynamic Catchment Analytics</h2>
+                        <span style="font-size: 11px; color: var(--text-muted);">Real-time historical series & empirical correlation charts</span>
+                    </div>
+                    <div class="btn-toggle-group" id="analytics-range-group">
+                        <button class="toggle-btn active" data-range="1h">1 HOUR</button>
+                        <button class="toggle-btn" data-range="6h">6 HOURS</button>
+                        <button class="toggle-btn" data-range="24h">24 HOURS</button>
+                        <button class="toggle-btn" data-range="7d">7 DAYS</button>
+                    </div>
+                </div>
+
+                <!-- Analytics Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <!-- Chart 1: Rainfall vs Water Level (Requirement 17) -->
+                    <section class="panel">
+                        <div class="panel-header">
+                            <h2><i data-lucide="activity"></i> Rainfall vs Water Level Response</h2>
+                            <span class="panel-subtitle">Dual-Axis Inflow Inundation Correlation</span>
+                        </div>
+                        <div style="padding: 16px; height: 320px;">
+                            <canvas id="chart-rain-vs-level"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- Chart 2: Composite Risk Trajectory Over Time (Requirement 17) -->
+                    <section class="panel">
+                        <div class="panel-header">
+                            <h2><i data-lucide="trending-up"></i> Composite Risk Score Trajectory</h2>
+                            <span class="panel-subtitle">Multi-Node Warning & Danger Bounds</span>
+                        </div>
+                        <div style="padding: 16px; height: 320px;">
+                            <canvas id="chart-risk-time"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- Chart 3: 4-Node Sensor Comparison (Requirement 17: Muted Teals) -->
+                    <section class="panel">
+                        <div class="panel-header">
+                            <h2><i data-lucide="layers"></i> Upstream-Downstream Sensor Comparison</h2>
+                            <span class="panel-subtitle">Hydraulic Gradient across S1, S2, S3 & S4</span>
+                        </div>
+                        <div style="padding: 16px; height: 320px;">
+                            <canvas id="chart-sensor-comp"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- Chart 4: Mitigation Pump & Gate Activity (Requirement 17) -->
+                    <section class="panel">
+                        <div class="panel-header">
+                            <h2><i data-lucide="zap"></i> SCADA Mitigation Discharge Volume</h2>
+                            <span class="panel-subtitle">Pump Flow (m³/s) & Gate Opening Percent</span>
+                        </div>
+                        <div style="padding: 16px; height: 320px;">
+                            <canvas id="chart-pump-activity"></canvas>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- ===================================================================
+                 TAB 3: INCIDENT ARCHIVE (Requirement 12)
+                 =================================================================== -->
+            <div id="tab-history" class="tab-content" style="display: none; flex-direction: column; gap: 16px; width: 100%;">
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2><i data-lucide="history"></i> Dynamic Incident & Event Archive</h2>
+                        <span class="panel-subtitle">Auto-recorded when simulation thresholds are crossed</span>
+                    </div>
+                    <div style="padding: 16px 20px; overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid var(--border); color: var(--text-secondary); font-size: 11px; text-transform: uppercase;">
+                                    <th style="padding: 12px 14px;">Event ID</th>
+                                    <th style="padding: 12px 14px;">Timestamp</th>
+                                    <th style="padding: 12px 14px;">Catchment Zone</th>
+                                    <th style="padding: 12px 14px;">Peak Depth</th>
+                                    <th style="padding: 12px 14px;">Max Risk</th>
+                                    <th style="padding: 12px 14px;">Rainfall</th>
+                                    <th style="padding: 12px 14px;">Debris Blockage</th>
+                                    <th style="padding: 12px 14px;">SCADA Response</th>
+                                    <th style="padding: 12px 14px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dynamic-incident-tbody">
+                                <!-- Populated dynamically by app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ===================================================================
+                 TAB 4: SYSTEM ARCHITECTURE & NEUTRALITY (Requirement 18)
+                 =================================================================== -->
+            <div id="tab-architecture" class="tab-content" style="display: none; flex-direction: column; gap: 16px; width: 100%;">
+                <div class="arch-layer-card">
+                    <div class="arch-layer-header">
+                        <span class="arch-layer-badge teal">LAYER 01</span>
+                        <h3 style="font-size: 14px; font-weight: 700; color: #ffffff;">Physical Catchment & IoT Edge Sensing</h3>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        Solar-powered telemetry pods equipped with ESP32-S3 microcontrollers and JSN-SR04T IP68 ultrasonic transducers. Each unit executes on-chip Kalman filtering to reject surface turbulent ripples before transmission.
+                    </p>
+                </div>
+
+                <div class="arch-layer-card">
+                    <div class="arch-layer-header">
+                        <span class="arch-layer-badge teal">LAYER 02</span>
+                        <h3 style="font-size: 14px; font-weight: 700; color: #ffffff;">Telemetry Transport & Gateway Ingestion</h3>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        Dual-path LoRaWAN (868/915 MHz) and 4G-LTE cellular backhaul with TLS 1.3 encrypted MQTT brokers. Automated failover ensures uninterrupted data ingestion even during cellular power outages.
+                    </p>
+                </div>
+
+                <div class="arch-layer-card">
+                    <div class="arch-layer-header">
+                        <span class="arch-layer-badge amber">LAYER 03</span>
+                        <h3 style="font-size: 14px; font-weight: 700; color: #ffffff;">FLUXORA Forecast Core & Predictive Analytics</h3>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        Hybrid hydrodynamic models combining Saint-Venant 1D shallow water channel equations with real-time Manning roughness coefficient adaptation for silt and debris accumulation.
+                    </p>
+                </div>
+
+                <div class="arch-layer-card">
+                    <div class="arch-layer-header">
+                        <span class="arch-layer-badge red">LAYER 04</span>
+                        <h3 style="font-size: 14px; font-weight: 700; color: #ffffff;">Emergency Response & SCADA Mitigation Actuation</h3>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        Closed-loop Modbus TCP/IP integration with municipal drainage pumps and motorized sluice gates. Automated Common Alerting Protocol (CAP v1.2) emergency broadcasts sent to NDMA and municipal disaster helplines.
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Main Application Logic (v=12) -->
+    <script src="assets/js/app.js?v=12"></script>
+</body>
+</html>

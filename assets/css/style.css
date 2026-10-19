@@ -1,0 +1,1633 @@
+/* ==========================================================================
+   FLUXORA | Predictive Urban Flood Intelligence
+   Enterprise Municipal SCADA & Hydrological Command Surface
+   ========================================================================== */
+
+/* 1. EXACT ROOT PALETTE & DESIGN TOKENS (Requirement 1 & 2) */
+:root {
+    --bg: #071411;
+    --surface: #0D1C18;
+    --surface-2: #12241F;
+    --surface-3: #172B25;
+
+    --primary: #0F766E;
+    --primary-light: #2DD4BF;
+
+    --prediction: #D6A84F;
+    --warning: #D99A2B;
+    --danger: #C94C4C;
+    --state-normal: #4F9D69;
+
+    --text-primary: #E7F0EC;
+    --text-secondary: #A8B9B2;
+    --text-muted: #71857D;
+
+    --border: rgba(141, 187, 174, 0.12);
+    --border-highlight: rgba(45, 212, 191, 0.25);
+    --border-prediction: rgba(214, 168, 79, 0.35);
+
+    /* Typography */
+    --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --shadow-card: 0 6px 24px rgba(0, 0, 0, 0.45);
+    --shadow-glow-teal: 0 0 16px rgba(45, 212, 191, 0.2);
+    --shadow-glow-amber: 0 0 16px rgba(214, 168, 79, 0.2);
+}
+
+/* Global Reset & Base Setup */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg);
+    background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(15, 118, 110, 0.15), transparent 70%),
+        linear-gradient(180deg, rgba(7, 20, 17, 0.8) 0%, var(--bg) 100%);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    padding: 16px 24px;
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--surface-3);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+.app-container {
+    max-width: 1680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ==========================================================================
+   2. SIMPLIFIED & VISUALLY GROUPED HEADER (Requirement 4 & 3)
+   ========================================================================== */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px 24px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    z-index: 10;
+}
+
+/* LEFT: Brand Lockup */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-icon-box {
+    width: 38px;
+    height: 38px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-highlight);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.brand-title-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.brand-tagline {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* CENTER: Status & Mode Indicators */
+.header-center {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--state-normal);
+    box-shadow: 0 0 8px var(--state-normal);
+    animation: pulse-dot 2.5s infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.status-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+}
+
+.header-feed-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.feed-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    box-shadow: 0 0 6px var(--primary-light);
+}
+
+/* RIGHT: Controls, Clock & Weather */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.view-toggle-wrap {
+    display: flex;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px;
+}
+
+.btn-view-mode {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+
+.btn-view-mode.active {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.header-time-block {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
+}
+
+.header-weather-block {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--surface-2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+/* ==========================================================================
+   3. FLUXORA FLOW MOTIF (Requirement 20)
+   ========================================================================== */
+.fluxora-flow-motif {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.fluxora-flow-motif::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 8%;
+    right: 8%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        var(--primary) 0%, 
+        var(--primary-light) 50%, 
+        var(--prediction) 75%, 
+        var(--warning) 100%
+    );
+    opacity: 0.4;
+    z-index: 1;
+}
+
+.flow-step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    padding: 2px 12px;
+}
+
+.flow-node {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.flow-node.physical {
+    color: var(--primary-light);
+}
+
+.flow-node.prediction {
+    color: var(--prediction);
+}
+
+.flow-arrow {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.flow-arrow.to-prediction {
+    color: var(--prediction);
+}
+
+/* ==========================================================================
+   4. NAVIGATION TABS (Requirement 12)
+   ========================================================================== */
+.dashboard-tabs {
+    display: flex;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+}
+
+.tab-link {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.tab-link:hover {
+    background: var(--surface-2);
+    color: var(--text-primary);
+    border-color: var(--border-highlight);
+}
+
+.tab-link.active {
+    background: var(--primary);
+    border-color: var(--primary-light);
+    color: #ffffff;
+    box-shadow: var(--shadow-glow-teal);
+}
+
+/* ==========================================================================
+   5. NARRATIVE STRESS TEST & BANNER (Requirement 15)
+   ========================================================================== */
+.live-packet-stream {
+    background: var(--surface-2);
+    border: 1px solid var(--border-highlight);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--primary-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.narrative-step-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 16px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nsb-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nsb-stage-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nsb-track {
+    width: 100%;
+    height: 8px;
+    background: var(--surface-3);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.nsb-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--primary-light);
+    border-radius: 4px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* ==========================================================================
+   6. METRICS ROW & HERO FLOOD RISK CARD (Requirement 5 & 2)
+   ========================================================================== */
+.metrics-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.4fr 1fr;
+    gap: 16px;
+}
+
+.metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-highlight);
+}
+
+.metric-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--primary-light);
+}
+
+.metric-data {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-grow: 1;
+}
+
+.metric-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.metric-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.metric-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* HERO FLOOD RISK CARD (~1.4x weight, amber accent edge) */
+.metric-card.hero-risk-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border-prediction);
+    border-left: 4px solid var(--prediction);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(214, 168, 79, 0.1);
+}
+
+.hero-risk-card .metric-icon {
+    background: rgba(214, 168, 79, 0.12);
+    border-color: rgba(214, 168, 79, 0.3);
+    color: var(--prediction);
+}
+
+.hero-risk-card .metric-label {
+    color: var(--prediction);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hero-risk-card .metric-label::before {
+    content: '▌';
+    color: var(--prediction);
+    font-size: 13px;
+}
+
+.hero-risk-card .metric-value {
+    font-size: 30px;
+    color: var(--prediction);
+    letter-spacing: -0.5px;
+}
+
+.hero-risk-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(214, 168, 79, 0.15);
+    color: var(--prediction);
+    font-size: 10px;
+    font-weight: 800;
+    margin-left: 6px;
+}
+
+/* ==========================================================================
+   7. PANELS & COMMON SURFACES
+   ========================================================================== */
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    position: relative;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+}
+
+.panel-header h2 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.panel-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   8. URBAN CATCHMENT MAP & LEAFLET DARK TILES (Requirements 6 & 7)
+   ========================================================================== */
+.map-container {
+    position: relative;
+    background: #071411;
+    border-radius: var(--radius-md);
+    margin: 12px;
+    border: 1px solid rgba(141, 187, 174, 0.15);
+    overflow: hidden;
+}
+
+#fluxora-map {
+    width: 100%;
+    height: 450px;
+    background: #071411 !important;
+}
+
+/* Tile Filter Classes for Base Map Providers (Zero Watermarks, 100% Free) */
+.google-dark-tiles {
+    filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(90%) saturate(0.35);
+}
+
+.google-sat-tiles {
+    filter: brightness(0.72) contrast(1.15) saturate(0.85);
+}
+
+.esri-dark-tiles {
+    filter: brightness(0.9) contrast(1.1) hue-rotate(145deg) saturate(0.5);
+}
+
+#fluxora-map .leaflet-container {
+    background-color: #071411 !important;
+    font-family: var(--font-sans);
+}
+
+/* Floating Controls Common */
+.map-overlay-controls {
+    position: absolute;
+    z-index: 1000;
+    display: flex;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+.map-overlay-controls.top-left {
+    top: 12px;
+    left: 12px;
+    flex-direction: column;
+}
+
+.map-overlay-controls.top-right {
+    top: 12px;
+    right: 12px;
+}
+
+.map-ctrl-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(13, 28, 24, 0.88);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.map-ctrl-btn:hover {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.map-ctrl-btn svg {
+    width: 15px;
+    height: 15px;
+}
+
+/* Layers Dropdown */
+.map-layers-widget {
+    position: relative;
+}
+
+.map-layers-btn {
+    height: 32px;
+    padding: 0 12px;
+    background: rgba(13, 28, 24, 0.88);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.2s ease;
+}
+
+.map-layers-btn:hover {
+    border-color: var(--primary-light);
+    color: var(--primary-light);
+}
+
+.map-layers-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.map-layers-dropdown {
+    position: absolute;
+    top: 38px;
+    right: 0;
+    width: 180px;
+    background: rgba(13, 28, 24, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+}
+
+.map-layers-dropdown label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.map-layers-dropdown input[type="checkbox"] {
+    accent-color: var(--primary-light);
+}
+
+/* Floating SCADA Legend */
+.map-overlay-legend.bottom-right {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    z-index: 1000;
+    background: rgba(13, 28, 24, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
+}
+
+.scada-legend-header {
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 3px;
+}
+
+.scada-legend-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+}
+
+.leg-item {
+    font-size: 9.5px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.leg-sym {
+    display: inline-block;
+}
+
+.leg-sym.dot-teal {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4F9D69;
+    border: 1px solid #2DD4BF;
+}
+
+.leg-sym.line-teal {
+    width: 14px;
+    height: 3px;
+    background: #0F766E;
+    border-radius: 1px;
+}
+
+.leg-sym.flow-dash {
+    width: 14px;
+    height: 3px;
+    background: repeating-linear-gradient(90deg, #2DD4BF, #2DD4BF 3px, transparent 3px, transparent 6px);
+}
+
+.leg-sym.poly-amber {
+    width: 10px;
+    height: 10px;
+    background: rgba(214, 168, 79, 0.25);
+    border: 1px dashed #D6A84F;
+    border-radius: 2px;
+}
+
+.leg-sym.poly-red {
+    width: 10px;
+    height: 10px;
+    background: rgba(201, 76, 76, 0.35);
+    border: 1px solid #C94C4C;
+    border-radius: 2px;
+}
+
+.leg-sym.pump-icon {
+    font-size: 10px;
+    color: #2DD4BF;
+}
+
+.leg-sym.gate-icon {
+    font-size: 10px;
+    color: #D6A84F;
+}
+
+/* Floating Threat State Pill (Bottom-Left) */
+.map-overlay-pill.bottom-left {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    z-index: 1000;
+    background: rgba(13, 28, 24, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-primary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
+}
+
+.threat-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.threat-dot.dot-normal {
+    background: var(--state-normal);
+    box-shadow: 0 0 6px rgba(79, 157, 105, 0.6);
+}
+
+.threat-dot.dot-warning {
+    background: var(--warning);
+    box-shadow: 0 0 8px rgba(217, 154, 43, 0.8);
+}
+
+.threat-dot.dot-danger {
+    background: var(--danger);
+    box-shadow: 0 0 10px rgba(201, 76, 76, 1);
+    animation: danger-pulse 1.2s infinite;
+}
+
+/* Custom Sensor DivIcon Markers */
+.leaflet-sensor-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+}
+
+.sensor-marker-pin {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.sensor-marker-pulse {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 50%;
+    animation: marker-pulse 2s infinite ease-out;
+    pointer-events: none;
+}
+
+.sensor-marker-core {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.sensor-marker-id {
+    position: absolute;
+    z-index: 3;
+    font-size: 8.5px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.sensor-marker-label {
+    background: rgba(13, 28, 24, 0.9);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 3px;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sensor-marker-depth {
+    color: var(--primary-light);
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+/* State Variants */
+.leaflet-sensor-marker.state-normal .sensor-marker-pin {
+    background: rgba(79, 157, 105, 0.25);
+    border: 1.5px solid #4F9D69;
+}
+.leaflet-sensor-marker.state-normal .sensor-marker-core {
+    background: #4F9D69;
+}
+.leaflet-sensor-marker.state-normal .sensor-marker-pulse {
+    border: 1.5px solid rgba(79, 157, 105, 0.5);
+}
+
+.leaflet-sensor-marker.state-warning .sensor-marker-pin {
+    background: rgba(217, 154, 43, 0.3);
+    border: 1.5px solid var(--warning);
+}
+.leaflet-sensor-marker.state-warning .sensor-marker-core {
+    background: var(--warning);
+}
+.leaflet-sensor-marker.state-warning .sensor-marker-pulse {
+    border: 1.5px solid rgba(217, 154, 43, 0.7);
+}
+.leaflet-sensor-marker.state-warning .sensor-marker-depth {
+    color: var(--warning);
+}
+
+.leaflet-sensor-marker.state-danger .sensor-marker-pin {
+    background: rgba(201, 76, 76, 0.35);
+    border: 2px solid var(--danger);
+}
+.leaflet-sensor-marker.state-danger .sensor-marker-core {
+    background: var(--danger);
+}
+.leaflet-sensor-marker.state-danger .sensor-marker-pulse {
+    border: 2px solid rgba(201, 76, 76, 0.85);
+}
+.leaflet-sensor-marker.state-danger .sensor-marker-depth {
+    color: var(--danger);
+}
+
+.leaflet-sensor-marker.selected .sensor-marker-pin {
+    box-shadow: 0 0 0 3px #ffffff, 0 0 14px var(--primary-light);
+}
+
+@keyframes marker-pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* Infrastructure Markers (Pumps & Sluice Gate) */
+.leaflet-infra-marker {
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s ease;
+}
+.leaflet-infra-marker:hover {
+    transform: scale(1.15);
+}
+
+.infra-pump-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #0D1C18;
+    border: 1.5px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--primary-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.infra-pump-badge.active {
+    border-color: var(--primary-light);
+    background: rgba(45, 212, 191, 0.25);
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.6);
+}
+
+.infra-pump-badge.active::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px dashed var(--primary-light);
+    animation: spin 3s linear infinite;
+}
+
+.infra-gate-badge {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: #0D1C18;
+    border: 1.5px solid var(--prediction);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 800;
+    color: var(--prediction);
+    transform: rotate(45deg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.infra-gate-badge span {
+    transform: rotate(-45deg);
+}
+
+.infra-gate-badge.open {
+    background: rgba(214, 168, 79, 0.3);
+    box-shadow: 0 0 12px rgba(214, 168, 79, 0.6);
+}
+
+.spin {
+    animation: spin 3s linear infinite;
+    transform-origin: center;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* Animated Water Flow on Leaflet Polylines */
+.leaflet-flow-path {
+    stroke-dasharray: 8, 12;
+    animation: flowDash 1.2s linear infinite;
+}
+
+@keyframes flowDash {
+    to {
+        stroke-dashoffset: -20px;
+    }
+}
+
+.leaflet-flow-path-amber {
+    stroke: #D6A84F !important;
+    animation-duration: 2.2s;
+}
+
+.leaflet-flow-path-red {
+    stroke: #C94C4C !important;
+    animation-duration: 3.5s;
+}
+
+/* ==========================================================================
+   9. SENSOR TELEMETRY TABLE
+   ========================================================================== */
+.sensor-table-container {
+    padding: 12px 20px;
+}
+
+.sensor-grid-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.sensor-grid-table th {
+    text-align: left;
+    padding: 8px 10px;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+}
+
+.sensor-grid-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+}
+
+.sensor-grid-table tr:hover td {
+    background: var(--surface-2);
+    color: var(--text-primary);
+}
+
+.sensor-grid-table tr.active td {
+    background: rgba(15, 118, 110, 0.15);
+    color: var(--text-primary);
+    border-left: 2px solid var(--primary-light);
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.state-normal {
+    background: rgba(79, 157, 105, 0.15);
+    color: var(--state-normal);
+    border: 1px solid rgba(79, 157, 105, 0.3);
+}
+
+.state-warning {
+    background: rgba(217, 154, 43, 0.15);
+    color: var(--warning);
+    border: 1px solid rgba(217, 154, 43, 0.3);
+}
+
+.state-danger {
+    background: rgba(201, 76, 76, 0.18);
+    color: var(--danger);
+    border: 1px solid rgba(201, 76, 76, 0.35);
+}
+
+/* ==========================================================================
+   10. FLOOD SCENARIO LAB (Requirements 13 & 14)
+   ========================================================================== */
+.fsl-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.fsl-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 18px 20px;
+}
+
+.fsl-category-box {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fsl-cat-title {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--primary-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+}
+
+.control-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.control-value {
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface-3);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    cursor: pointer;
+    box-shadow: 0 0 6px var(--primary-light);
+}
+
+.slider-marks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.btn-toggle-group {
+    display: flex;
+    background: var(--surface-3);
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.toggle-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+    color: var(--text-primary);
+}
+
+.toggle-btn.active {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.pump-indicators {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.pump-led {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--surface-3);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.pump-led.active {
+    background: rgba(15, 118, 110, 0.2);
+    color: var(--primary-light);
+    border-color: var(--primary-light);
+}
+
+/* Action Buttons */
+.btn {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-demo {
+    background: var(--primary);
+    color: #ffffff;
+    border: 1px solid var(--primary-light);
+}
+.btn-demo:hover {
+    background: var(--primary-light);
+    color: var(--bg);
+}
+
+.btn-secondary {
+    background: var(--surface-3);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+.btn-secondary:hover {
+    background: var(--surface-2);
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   11. FORECAST TIMELINE (Requirement 8 - Compact Sleek Strip)
+   ========================================================================== */
+.flood-horizon-timeline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    margin-top: 4px;
+}
+
+.fht-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.fht-time {
+    font-size: 8.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.fht-node {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8.5px;
+    font-weight: 800;
+    transition: all 0.3s ease;
+}
+
+/* NOW & +10m: Teal (Observed / Near) */
+#fht-node-now, #fht-node-10 {
+    background: rgba(15, 118, 110, 0.25);
+    border: 1.5px solid var(--primary-light);
+    color: var(--primary-light);
+}
+
+/* +20m & +30m: Amber (Predicted horizon) */
+#fht-node-20, #fht-node-30 {
+    background: rgba(214, 168, 79, 0.2);
+    border: 1.5px solid var(--prediction);
+    color: var(--prediction);
+}
+
+/* +45m: Amber or Red */
+#fht-node-45 {
+    background: rgba(214, 168, 79, 0.2);
+    border: 1.5px solid var(--prediction);
+    color: var(--prediction);
+}
+
+#fht-node-45.danger-state {
+    background: rgba(201, 76, 76, 0.25);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.fht-depth {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.fht-connector {
+    flex-grow: 1;
+    height: 1.5px;
+    margin: 0 4px;
+    background: var(--surface-3);
+    position: relative;
+    top: 0;
+}
+
+/* High-specificity dynamic status overrides for timeline nodes */
+.flood-horizon-timeline .fht-node.state-danger {
+    background: rgba(201, 76, 76, 0.25) !important;
+    border: 1.5px solid var(--danger) !important;
+    color: var(--danger) !important;
+    box-shadow: 0 0 8px rgba(201, 76, 76, 0.4) !important;
+}
+
+.flood-horizon-timeline .fht-node.state-warning {
+    background: rgba(217, 154, 43, 0.25) !important;
+    border: 1.5px solid var(--warning) !important;
+    color: var(--warning) !important;
+    box-shadow: 0 0 8px rgba(217, 154, 43, 0.4) !important;
+}
+
+.flood-horizon-timeline .fht-node.state-normal {
+    background: rgba(15, 118, 110, 0.25);
+    border: 1.5px solid var(--primary-light);
+    color: var(--primary-light);
+}
+
+.fht-connector:nth-of-type(2) {
+    background: var(--primary); /* Observed connector */
+}
+
+.fht-connector:nth-of-type(4),
+.fht-connector:nth-of-type(6),
+.fht-connector:nth-of-type(8) {
+    background: repeating-linear-gradient(90deg, var(--prediction), var(--prediction) 4px, transparent 4px, transparent 8px); /* Dashed prediction */
+}
+
+/* ==========================================================================
+   12. FLUXORA FORECAST CORE (Requirements 9 & 10)
+   ========================================================================== */
+.risk-breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.risk-breakdown-table th {
+    text-align: left;
+    padding: 6px 8px;
+    color: var(--text-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+}
+
+.risk-breakdown-table td {
+    padding: 8px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+}
+
+/* Total calculated risk row in amber */
+#rb-score-total {
+    color: var(--prediction);
+    font-weight: 800;
+    font-family: var(--font-mono);
+}
+
+/* Computed Confidence in teal */
+#pe-confidence-val {
+    color: var(--primary-light) !important;
+}
+
+/* ==========================================================================
+   13. ACTION CENTER (Requirement 11)
+   ========================================================================== */
+.action-center-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ac-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ac-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ac-status-tag {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    padding: 3px 10px;
+    border-radius: 4px;
+}
+
+/* Recommendations in Amber */
+#ac-rec-action {
+    color: var(--prediction);
+    font-weight: 700;
+}
+
+.ac-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    font-size: 11px;
+}
+
+.ac-cell-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.ac-cell-value {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.ac-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.ac-btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.ac-btn-execute {
+    background: var(--primary);
+    color: #ffffff;
+    border: 1px solid var(--primary-light);
+}
+.ac-btn-execute:hover {
+    background: var(--primary-light);
+    color: var(--bg);
+}
+
+.ac-btn-ack {
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.ac-btn-override {
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+/* ==========================================================================
+   14. SYSTEM ARCHITECTURE NEUTRALITY (Requirement 18)
+   ========================================================================== */
+.arch-layer-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px 22px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+}
+
+.arch-layer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+}
+
+.arch-layer-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+}
+
+.arch-layer-badge.teal {
+    background: rgba(15, 118, 110, 0.2);
+    color: var(--primary-light);
+    border: 1px solid var(--primary);
+}
+
+.arch-layer-badge.amber {
+    background: rgba(214, 168, 79, 0.2);
+    color: var(--prediction);
+    border: 1px solid var(--prediction);
+}
+
+.arch-layer-badge.red {
+    background: rgba(201, 76, 76, 0.2);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+}
+
+/* Responsive Overrides */
+@media (max-width: 1200px) {
+    .metrics-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .fsl-categories-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-header {
+        flex-direction: column;
+        gap: 14px;
+        align-items: flex-start;
+    }
+    .header-center, .header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .metrics-row {
+        grid-template-columns: 1fr;
+    }
+}
